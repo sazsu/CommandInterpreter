@@ -1,94 +1,114 @@
 import os
 import shutil
-command_list = ["ls", "cd", "mv", "rm", "mkdir", "pwd", "clear", "help"]
+command_list = ["ls", "cd", "mv", "rm", "mk", "mkdir", "pwd", "clear", "help"]
 help_dict = {
     "ls" : "вывести содержимое текущей директории",
     "cd" : "изменить текущую директорию",
     "mv" : "переместить файл или директорию",
     "rm" : "удалить файл или директорию",
+    "mk" : "создать файл",
     "mkdir" : "создать директорию",
     "pwd" : "вывести текущую директорию",
     "clear" : "очистить экран",
     "exit" : "завершить программу"
 }
 def check_file_folder(path):
-    if os.path.isfile(path):
-        return 1
-    elif os.path.isdir(path):
-        if not os.listdir(path):
-            return 3
-        else:
-            return 2
+    if os.path.exists(path):
+        if os.path.isfile(path):
+            return 1
+        elif os.path.isdir(path):
+            return 2 if os.listdir(path) else 3
+    return 0
+
+def ls(current_path):
+    contents = os.listdir(current_path)
+    result = "\n".join(contents)
+    return result
+def cd(args):
+    if args.startswith("\\"):
+        args = args[1:]
+    os.chdir(args)
+
+def mv(args, current_path):
+    src, dest = args.split(" \\", 1)
+    source_path = os.path.join(current_path, src)
+    destination_path = os.path.join(current_path, dest)
+
+    shutil.move(source_path, destination_path)
+
+def rm(args):
+    result = None
+    match check_file_folder(args):
+        case 0:
+            result = "Нет такого файла или директории"
+        case 1:
+            os.remove(args)
+        case 2:
+            shutil.rmtree(args)
+        case 3:
+            os.rmdir(args)
+    return result
+def mk(args):
+    with open(args, "a") as file:
+        while True:
+            user_append_to_file = input()
+            if user_append_to_file.lower() != "exit":
+                file.write(user_append_to_file + '\n')
+            else:
+                break
+
+def mkdir(args, current_path):
+    os.mkdir(current_path + "\\" + str(args))
+
+def pwd():
+    return os.getcwd()
+
+def clear():
+    os.system("cls" if os.name == "nt" else "clear")
+
+def help(args):
+    if args and args in command_list:
+        result = f'{args} - {help_dict.get(args)}'
     else:
-        return 0
+        result = "\n".join(command_list)
+    return result
 
 def run_command(user_input):
     try:
+        current_path = os.getcwd()
         command = user_input[0]
         args = user_input[1] if len(user_input) >= 2 else None
-        current_path = os.getcwd()
         match command:
             case "ls":
-                contents = os.listdir(current_path)
-                result = "\n".join(contents)
+                result = ls(current_path)
             case "cd":
-                os.chdir(user_input[1])
-
-                result = None
+                result = cd(args)
             case "mv":
-                prefix_index = args.find(' "')
-                source_path = current_path + "\\" + args[:prefix_index + 1]
-                destination_path = args[prefix_index + 2:-1]
-
-                shutil.move(source_path, destination_path)
-
-                result = None
+                result = mv(args, current_path)
             case "rm":
-                path = current_path + "\\" + str(args)
-                result = None
-
-                match check_file_folder(path):
-                    case 0:
-                        result = "Нет такого файла или директории"
-                    case 1:
-                        os.remove(args)
-                    case 2:
-                        shutil.rmtree(args)
-                    case 3:
-                        os.rmdir(args)
+                result = rm(args)
+            case "mk":
+                result = mk(args)
             case "mkdir":
-                os.mkdir(current_path + "\\" + str(args))
-                result = None
+                result = mkdir(args, current_path)
             case "pwd":
-                result = current_path
+                result = pwd()
             case "clear":
-                os.system("cls" if os.name == "nt" else "clear")
-                result = None
+                result = clear()
             case "help":
-                if args:
-                    if args in command_list:
-                        result = f'{args} - {help_dict.get(args)}'
-                    else:
-                        print("не правильный аргумент")
-                else:
-                    result = "\n".join(command_list)
-            case _:
-                result = f"Команда '{command}' не распознана"
+                result = help(args)
 
         print("", end="" if not result else result + "\n")
 
 
     except Exception as e:
-        return f"Ошибка: {e}"
-
+        print(f"Ошибка: {e}")
 
 while True:
     user_input = input()
-
     match user_input:
         case "exit":
             break
         case _:
             user_input = user_input.split(" ", 1)
-
             run_command(user_input)
