@@ -1,6 +1,7 @@
 import os
 import shutil
 
+
 command_list = ["ls", "cd", "mv", "rm", "mk", "mkdir", "pwd", "clear", "help"]
 help_dict = {
     "ls" : "вывести содержимое текущей директории",
