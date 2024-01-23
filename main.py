@@ -2,17 +2,17 @@ import os
 import shutil
 
 
-command_list = ["ls", "cd", "mv", "rm", "mk", "mkdir", "pwd", "clear", "help"]
-help_dict = {
-    "ls" : "вывести содержимое текущей директории",
-    "cd" : "изменить текущую директорию",
-    "mv" : "переместить файл или директорию",
-    "rm" : "удалить файл или директорию",
-    "mk" : "создать файл",
-    "mkdir" : "создать директорию",
-    "pwd" : "вывести текущую директорию",
-    "clear" : "очистить экран",
-    "exit" : "завершить программу"
+COMMANDS = ['ls', 'cd', 'mv', 'rm', 'mk', 'mkdir', 'pwd', 'clear', 'help']
+HELP_DICT = {
+    'ls' : 'вывести содержимое текущей директории',
+    'cd' : 'изменить текущую директорию',
+    'mv' : 'переместить файл или директорию',
+    'rm' : 'удалить файл или директорию',
+    'mk' : 'создать файл',
+    'mkdir' : 'создать директорию',
+    'pwd' : 'вывести текущую директорию',
+    'clear' : 'очистить экран',
+    'exit' : 'завершить программу'
 }
 
 
@@ -27,18 +27,18 @@ def check_file_folder(path: str) -> int:
 
 def ls(current_path: str) -> str:
     contents = os.listdir(current_path)
-    result = "\n".join(contents)
+    result = '\n'.join(contents)
     return result
 
 
 def cd(args: str) -> None:
-    if args.startswith("\\"):
+    if args.startswith('\\'):
         args = args[1:]
     os.chdir(args)
 
 
 def mv(args: str, current_path: str) -> None:
-    src, dest = args.split(" \\", 1)
+    src, dest = args.split(' \\', 1)
     source_path = os.path.join(current_path, src)
     destination_path = os.path.join(current_path, dest)
 
@@ -48,7 +48,7 @@ def mv(args: str, current_path: str) -> None:
 def rm(args: str):
     match check_file_folder(args):
         case 0:
-            result = "Нет такого файла или директории"
+            result = 'Нет такого файла или директории'
         case 1:
             os.remove(args)
         case 2:
@@ -59,17 +59,17 @@ def rm(args: str):
 
 
 def mk(args: str) -> None:
-    with open(args, "a") as file:
+    with open(args, 'a') as file:
         while True:
             user_append_to_file = input()
-            if user_append_to_file.lower() != "exit":
+            if user_append_to_file.lower() != 'exit':
                 file.write(user_append_to_file + '\n')
             else:
                 break
 
 
 def mkdir(args: str, current_path: str) -> None:
-    os.mkdir(current_path + "\\" + str(args))
+    os.mkdir(current_path + '\\' + str(args))
 
 
 def pwd() -> str:
@@ -77,14 +77,14 @@ def pwd() -> str:
 
 
 def clear() -> None:
-    os.system("cls" if os.name == "nt" else "clear")
+    os.system('cls' if os.name == 'nt' else 'clear')
 
 
 def help(args: str) -> str:
-    if args and args in command_list:
-        result = f'{args} - {help_dict.get(args)}'
+    if args and args in COMMANDS:
+        result = f'{args} - {HELP_DICT.get(args)}'
     else:
-        result = "\n".join(command_list)
+        result = '\n'.join(COMMANDS)
     return result
 
 
@@ -94,34 +94,34 @@ def run_command(user_input: str) -> None:
         command = user_input[0]
         args = user_input[1] if len(user_input) >= 2 else None
         match command:
-            case "ls":
+            case 'ls':
                 result = ls(current_path)
-            case "cd":
+            case 'cd':
                 result = cd(args)
-            case "mv":
+            case 'mv':
                 result = mv(args, current_path)
-            case "rm":
+            case 'rm':
                 result = rm(args)
-            case "mk":
+            case 'mk':
                 result = mk(args)
-            case "mkdir":
+            case 'mkdir':
                 result = mkdir(args, current_path)
-            case "pwd":
+            case 'pwd':
                 result = pwd()
-            case "clear":
+            case 'clear':
                 result = clear()
-            case "help":
+            case 'help':
                 result = help(args)
-        print("", end="" if not result else result + "\n")
+        print('', end='' if not result else result + '\n')
     except Exception as e:
-        print(f"Ошибка: {e}")
+        print(f'Ошибка: {e}')
 
 
 while True:
     user_input = input()
     match user_input:
-        case "exit":
+        case 'exit':
             break
         case _:
-            user_input = user_input.split(" ", 1)
+            user_input = user_input.split(' ', 1)
             run_command(user_input)
