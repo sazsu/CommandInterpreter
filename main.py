@@ -1,5 +1,6 @@
 import os
 import shutil
+
 command_list = ["ls", "cd", "mv", "rm", "mk", "mkdir", "pwd", "clear", "help"]
 help_dict = {
     "ls" : "вывести содержимое текущей директории",
@@ -12,7 +13,9 @@ help_dict = {
     "clear" : "очистить экран",
     "exit" : "завершить программу"
 }
-def check_file_folder(path):
+
+
+def check_file_folder(path: str) -> int:
     if os.path.exists(path):
         if os.path.isfile(path):
             return 1
@@ -20,24 +23,28 @@ def check_file_folder(path):
             return 2 if os.listdir(path) else 3
     return 0
 
-def ls(current_path):
+
+def ls(current_path: str) -> str:
     contents = os.listdir(current_path)
     result = "\n".join(contents)
     return result
-def cd(args):
+
+
+def cd(args: str) -> None:
     if args.startswith("\\"):
         args = args[1:]
     os.chdir(args)
 
-def mv(args, current_path):
+
+def mv(args: str, current_path: str) -> None:
     src, dest = args.split(" \\", 1)
     source_path = os.path.join(current_path, src)
     destination_path = os.path.join(current_path, dest)
 
     shutil.move(source_path, destination_path)
 
-def rm(args):
-    result = None
+
+def rm(args: str):
     match check_file_folder(args):
         case 0:
             result = "Нет такого файла или директории"
@@ -47,8 +54,10 @@ def rm(args):
             shutil.rmtree(args)
         case 3:
             os.rmdir(args)
-    return result
-def mk(args):
+    return result if result else None
+
+
+def mk(args: str) -> None:
     with open(args, "a") as file:
         while True:
             user_append_to_file = input()
@@ -57,23 +66,28 @@ def mk(args):
             else:
                 break
 
-def mkdir(args, current_path):
+
+def mkdir(args: str, current_path: str) -> None:
     os.mkdir(current_path + "\\" + str(args))
 
-def pwd():
+
+def pwd() -> str:
     return os.getcwd()
 
-def clear():
+
+def clear() -> None:
     os.system("cls" if os.name == "nt" else "clear")
 
-def help(args):
+
+def help(args: str) -> str:
     if args and args in command_list:
         result = f'{args} - {help_dict.get(args)}'
     else:
         result = "\n".join(command_list)
     return result
 
-def run_command(user_input):
+
+def run_command(user_input: str) -> None:
     try:
         current_path = os.getcwd()
         command = user_input[0]
@@ -97,12 +111,10 @@ def run_command(user_input):
                 result = clear()
             case "help":
                 result = help(args)
-
         print("", end="" if not result else result + "\n")
-
-
     except Exception as e:
         print(f"Ошибка: {e}")
+
 
 while True:
     user_input = input()
